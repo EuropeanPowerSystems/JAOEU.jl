@@ -4,7 +4,43 @@
 CurrentModule = JAOEU
 ```
 
-## Client
+## JAO clients
+
+```@docs
+PublicationToolClient
+OwsmpClient
+publicationtool_core_da_api
+publicationtool_nordic_da_api
+publicationtool_italynorth_api
+publicationtool_coreid_cc_a_api
+owsmp_auctions_api
+```
+
+## Time helpers
+
+```@docs
+to_zoned_utc
+```
+
+## Named query wrappers
+
+```@docs
+monitoring
+net_position
+final_domain
+auction_corridors
+auction_horizons
+auction_results
+```
+
+## Response unwrappers
+
+```@docs
+rows
+total_rows
+```
+
+## Generic Client
 
 ```@docs
 Client

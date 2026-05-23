@@ -6,10 +6,19 @@ const HAS_SPEC = isfile(SPEC_SRC)
 
 # Bundle the committed OpenAPI spec into Vitepress's `public/` so the
 # vitepress-openapi components can fetch it from the deployed site.
+#
+# Only write when the content actually differs from what's already
+# there. `cp(...; force=true)` would unconditionally bump the
+# destination's mtime — and the destination lives inside `docs/src/`,
+# which `LiveServer.servedocs()` watches. A no-op rewrite would
+# trigger a rebuild, which would rewrite, which would re-trigger,
+# which is an infinite-build loop.
 if HAS_SPEC
     SPEC_DST = joinpath(@__DIR__, "src", "public", "openapi.json")
     mkpath(dirname(SPEC_DST))
-    cp(SPEC_SRC, SPEC_DST; force = true)
+    if !isfile(SPEC_DST) || read(SPEC_SRC) != read(SPEC_DST)
+        cp(SPEC_SRC, SPEC_DST; force = true)
+    end
 end
 
 # The per-tag REST reference pages live as committed source under
@@ -34,6 +43,10 @@ const API_PAGES = _api_pages(joinpath(@__DIR__, "src", "api"))
 const PAGES = Any[
     "Home" => "index.md",
     "Getting Started" => "getting_started.md",
+    "Tutorials" => Any[
+        "One trading day, three views" => "tutorial.md",
+        "Net positions on a European map" => "tutorial_net_positions_map.md",
+    ],
     "Guides" => Any[
         "Recorded HTTP tests" => "cassette_testing.md",
     ],

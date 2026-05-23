@@ -1,7 +1,7 @@
 # Generated Reference
 
 ```@meta
-CurrentModule = JAOEU.JAOEUAPI
+CurrentModule = JAOEU
 ```
 
 This page lists every Julia name produced by [OpenAPI Generator](https://openapi-generator.tech/)
@@ -29,4 +29,7 @@ domain client constructor when no explicit `base_url` is supplied.
 ```@docs
 JAOEUAPI.basepath(::Type{JAOEUAPI.OwsmpAuctionsApi})
 JAOEUAPI.basepath(::Type{JAOEUAPI.PublicationToolCoreDAApi})
+JAOEUAPI.basepath(::Type{JAOEUAPI.PublicationToolCoreIDCCaApi})
+JAOEUAPI.basepath(::Type{JAOEUAPI.PublicationToolItalyNorthApi})
+JAOEUAPI.basepath(::Type{JAOEUAPI.PublicationToolNordicDAApi})
 ```
