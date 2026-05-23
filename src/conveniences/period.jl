@@ -1,5 +1,5 @@
 using Dates: Dates, DateTime, Date
-using TimeZones: TimeZones, ZonedDateTime, TimeZone, utc
+using TimeZones: TimeZones, ZonedDateTime
 
 const _UTC = TimeZones.tz"UTC"
 
