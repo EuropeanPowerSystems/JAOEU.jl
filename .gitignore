@@ -13,3 +13,4 @@ node_modules/
 test/Manifest.toml
 examples/Manifest.toml
 token.txt
+.claude/
