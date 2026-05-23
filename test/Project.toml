@@ -14,3 +14,4 @@ TimeZones = "f269a46b-ccf7-5d73-abea-4c690281aa53"
 [compat]
 Aqua = "0.8"
 JET = "0.9, 0.10, 0.11"
+OpenAPI = "0.2.2"
