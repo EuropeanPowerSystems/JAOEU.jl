@@ -7,7 +7,7 @@ CurrentModule = JAOEU
 Documentation for [JAOEU.jl](https://github.com/EuropeanPowerSystems/JAOEU.jl).
 
 A Julia REST/JSON API wrapper scaffolded with
-[OpenAPITemplate.jl](https://github.com/EuropeanPowerSystems/OpenAPITemplate.jl).
+[OpenAPITemplate.jl](https://github.com/langestefan/OpenAPITemplate.jl).
 
 ## Quick start
 

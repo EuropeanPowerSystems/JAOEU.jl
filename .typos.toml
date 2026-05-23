@@ -11,6 +11,9 @@ YSE = "YSE"       # appears inside Swedish EIC "10YSE-1--------K"
 # substring (covers any PTD* identifier) and the common plural form.
 PTD = "PTD"
 PTDFs = "PTDFs"
+# `PN` → `ON` is in the typos default dictionary, which mangles PNG /
+# PNGs (image format) to ONG / ONGs. Whitelist the 2-letter substring.
+PN = "PN"
 
 [files]
 # `src/api/` is openapi-generator output. Treating it as authoritative

@@ -34,7 +34,7 @@ nl = data["zones"][findfirst(z -> z["key"] == "hub_NL", data["zones"])]
 
 ## Setting up the map
 
-We use [GeoMakie](https://geo.makie.org/stable/) on top of [CairoMakie](https://docs.makie.org/stable/explanations/backends/cairomakie) to render static ONGs: country polygons (Natural Earth Admin-0 dataset, medium detail) projected with Lambert Conformal Conic and coloured by the per-zone net position. Label positions sit at the [pole of inaccessibility](https://en.wikipedia.org/wiki/Pole_of_inaccessibility) of each country's largest mainland ring — that puts the number in the visual centre even for fractal coastlines.
+We use [GeoMakie](https://geo.makie.org/stable/) on top of [CairoMakie](https://docs.makie.org/stable/explanations/backends/cairomakie) to render static PNGs: country polygons (Natural Earth Admin-0 dataset, medium detail) projected with Lambert Conformal Conic and coloured by the per-zone net position. Label positions sit at the [pole of inaccessibility](https://en.wikipedia.org/wiki/Pole_of_inaccessibility) of each country's largest mainland ring — that puts the number in the visual centre even for fractal coastlines.
 
 ```@example npmap
 using GeoMakie, CairoMakie
