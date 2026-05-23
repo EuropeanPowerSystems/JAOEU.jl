@@ -50,11 +50,55 @@ const SERVER_REGISTRY = OrderedDict{String, NamedTuple}(
         # /data/<op> for normal operations, /system/<op> for `monitoring`.
         # The hook reads the synthetic path's third segment to decide.
     ),
+    "publicationtool_nordic_da" => (
+        prefix = "/publicationtool/nordic",
+        base_url = "https://publicationtool.jao.eu/nordic/api",
+        # Same /data and /system segments as Core. Disables several Core
+        # endpoints (allocationConstraint, netPos, lta, alphaFactor,
+        # priceSpread, scheduledExchanges); adds fbDomainShadowPrice;
+        # renames d2CF → cgmForeCast and Presolved filter key →
+        # NonRedundant.
+    ),
+    "publicationtool_italynorth" => (
+        prefix = "/publicationtool/ibwt",
+        base_url = "https://publicationtool.jao.eu/ibwt/api",
+        # `CCR_*` for day-ahead, `CCR_id*` for intraday. Operations live
+        # under /data/. No /system/ surface used here.
+    ),
+    "publicationtool_coreid" => (
+        prefix = "/publicationtool/coreID",
+        base_url = "https://publicationtool.jao.eu/coreID/api",
+        # CoreID intraday — endpoints prefixed `IDCC{a,b,c,d}_` or
+        # `ID{N}_` depending on whether this is the continuous-clearing
+        # (CC) or auction-clearing (IDA) flavour. For v0 we expose the
+        # `IDCCa_` set only; extend `_INTRADAY_VARIANTS` below to wire
+        # in the other versions.
+    ),
     "owsmp" => (
         prefix = "/owsmp",
         base_url = "https://api.jao.eu/OWSMP",
     ),
 )
+
+# Intraday variants — each entry expands the IDCC/IDA endpoint set onto
+# a unique tag + path prefix. Add more by appending here; the table
+# expansion below picks them up automatically.
+const _INTRADAY_VARIANTS = [
+    (
+        label = "a", endpoint_prefix = "IDCCa_", op_id_part = "idcc_a",
+        tag = "PublicationToolCoreIDCCa",
+        summary_suffix = "Core CCR intraday continuous clearing (window A)",
+    ),
+    # Uncomment to wire in additional variants:
+    # (label = "b", endpoint_prefix = "IDCCb_", op_id_part = "idcc_b",
+    #  tag = "PublicationToolCoreIDCCb", summary_suffix = "Core CCR intraday CC (window B)"),
+    # (label = "c", endpoint_prefix = "IDCCc_", op_id_part = "idcc_c",
+    #  tag = "PublicationToolCoreIDCCc", summary_suffix = "Core CCR intraday CC (window C)"),
+    # (label = "d", endpoint_prefix = "IDCCd_", op_id_part = "idcc_d",
+    #  tag = "PublicationToolCoreIDCCd", summary_suffix = "Core CCR intraday CC (window D)"),
+    # (label = "1", endpoint_prefix = "ID1_", op_id_part = "ida_1",
+    #  tag = "PublicationToolCoreIDA1", summary_suffix = "Core CCR intraday auctions (round 1)"),
+]
 
 # ---- parameter library ---------------------------------------------------
 #
@@ -400,6 +444,191 @@ const ENDPOINT_TABLE = NamedTuple[
         response_schema = "DataEnvelope",
     ),
 
+    # ──── Publication Tool — Nordic Day-Ahead ────
+    #
+    # Subset of Core DA: omits allocationConstraint, netPos, lta,
+    # alphaFactor, priceSpread, scheduledExchanges; adds
+    # fbDomainShadowPrice (Shape A — paginated active-constraint domain);
+    # renames d2CF → cgmForeCast. Filter JSON uses `NonRedundant`
+    # instead of `Presolved`.
+    (
+        server = "publicationtool_nordic_da", segment = "data",
+        path = "/finalComputation", op_id = "publicationtool_nordic_da_final_computation",
+        tag = "PublicationToolNordicDA", summary = "Final Nordic FB domain (CNECs + PTDFs)",
+        description = "Final computation of the Nordic flow-based domain.",
+        params = [:from_utc_iso, :to_utc_iso, :skip, :take, :filter_json],
+        response_schema = "DomainEnvelope",
+    ),
+    (
+        server = "publicationtool_nordic_da", segment = "data",
+        path = "/preFinalComputation", op_id = "publicationtool_nordic_da_prefinal_computation",
+        tag = "PublicationToolNordicDA", summary = "Pre-final Nordic FB domain",
+        description = "Pre-final Nordic flow-based domain, before TSO validation reductions.",
+        params = [:from_utc_iso, :to_utc_iso, :skip, :take, :filter_json],
+        response_schema = "DomainEnvelope",
+    ),
+    (
+        server = "publicationtool_nordic_da", segment = "data",
+        path = "/initialComputation", op_id = "publicationtool_nordic_da_initial_computation",
+        tag = "PublicationToolNordicDA", summary = "Initial Nordic FB domain",
+        description = "Initial Nordic FB domain output prior to validation.",
+        params = [:from_utc_iso, :to_utc_iso, :skip, :take, :filter_json],
+        response_schema = "DomainEnvelope",
+    ),
+    (
+        server = "publicationtool_nordic_da", segment = "data",
+        path = "/fbDomainShadowPrice", op_id = "publicationtool_nordic_da_fb_domain_shadow_price",
+        tag = "PublicationToolNordicDA", summary = "Nordic active-constraint shadow prices",
+        description = "Per-CNEC shadow prices for the binding Nordic active constraints (Shape A — paginated).",
+        params = [:from_utc_iso, :to_utc_iso, :skip, :take, :filter_json],
+        response_schema = "DomainEnvelope",
+    ),
+    (
+        server = "publicationtool_nordic_da", segment = "data",
+        path = "/validationReductions", op_id = "publicationtool_nordic_da_validation_reductions",
+        tag = "PublicationToolNordicDA", summary = "Nordic TSO validation reductions",
+        description = "Per-TSO Nordic validation reductions.",
+        params = [:from_utc_z, :to_utc_z],
+        response_schema = "DataEnvelope",
+    ),
+    (
+        server = "publicationtool_nordic_da", segment = "data",
+        path = "/maxExchanges", op_id = "publicationtool_nordic_da_max_exchanges",
+        tag = "PublicationToolNordicDA", summary = "Nordic max bilateral exchanges",
+        description = "Per-border max bilateral exchange limits in the Nordic CCR.",
+        params = [:from_utc_z, :to_utc_z],
+        response_schema = "DataEnvelope",
+    ),
+    (
+        server = "publicationtool_nordic_da", segment = "data",
+        path = "/maxNetPos", op_id = "publicationtool_nordic_da_max_net_positions",
+        tag = "PublicationToolNordicDA", summary = "Nordic min/max net positions per zone",
+        description = "Per-zone min and max net-position bounds for Nordic zones.",
+        params = [:from_utc_z, :to_utc_z],
+        response_schema = "DataEnvelope",
+    ),
+    (
+        server = "publicationtool_nordic_da", segment = "data",
+        path = "/spanningDefaultFBP", op_id = "publicationtool_nordic_da_spanning_default_fbp",
+        tag = "PublicationToolNordicDA", summary = "Nordic default-FBP status",
+        description = "Nordic default flow-based parameters fallback indicator.",
+        params = [:from_utc_z, :to_utc_z],
+        response_schema = "DataEnvelope",
+    ),
+    (
+        server = "publicationtool_nordic_da", segment = "data",
+        path = "/cgmForeCast", op_id = "publicationtool_nordic_da_cgm_forecast",
+        tag = "PublicationToolNordicDA", summary = "Nordic CGM forecast (Nordic d2CF alias)",
+        description = "Common Grid Model forecast — Nordic naming for the Core-side `d2CF` endpoint.",
+        params = [:from_utc_z, :to_utc_z],
+        response_schema = "DataEnvelope",
+    ),
+    (
+        server = "publicationtool_nordic_da", segment = "data",
+        path = "/refprog", op_id = "publicationtool_nordic_da_refprog",
+        tag = "PublicationToolNordicDA", summary = "Nordic reference programs",
+        description = "Reference programs feeding the Nordic flow-based computation.",
+        params = [:from_utc_z, :to_utc_z],
+        response_schema = "DataEnvelope",
+    ),
+    (
+        server = "publicationtool_nordic_da", segment = "data",
+        path = "/congestionIncome", op_id = "publicationtool_nordic_da_congestion_income",
+        tag = "PublicationToolNordicDA", summary = "Nordic congestion income per border",
+        description = "Nordic day-ahead congestion rent per border (EUR).",
+        params = [:from_utc_z, :to_utc_z],
+        response_schema = "DataEnvelope",
+    ),
+    (
+        server = "publicationtool_nordic_da", segment = "system",
+        path = "/monitoring", op_id = "publicationtool_nordic_da_monitoring",
+        tag = "PublicationToolNordicDA", summary = "Nordic publication monitoring",
+        description = "Process monitoring records for the Nordic CCR — served from `/system/`.",
+        params = [:from_utc_z, :to_utc_z],
+        response_schema = "DataEnvelope",
+    ),
+
+    # ──── Publication Tool — Italy North CCR (BWT) ────
+    #
+    # `CCR_*` for day-ahead, `CCR_id*` for intraday. Both flavours sit
+    # under the same `/data/` segment and share the same parameter
+    # shape as Core's Shape B endpoints.
+    (
+        server = "publicationtool_italynorth", segment = "data",
+        path = "/CCR_cnecInfo", op_id = "publicationtool_italynorth_da_cnec_info",
+        tag = "PublicationToolItalyNorth", summary = "Italy North day-ahead CNECs",
+        description = "Italy North day-ahead critical network elements and contingencies.",
+        params = [:from_utc_iso, :to_utc_iso, :skip, :take, :filter_json],
+        response_schema = "DomainEnvelope",
+    ),
+    (
+        server = "publicationtool_italynorth", segment = "data",
+        path = "/CCR_idCnecInfo", op_id = "publicationtool_italynorth_id_cnec_info",
+        tag = "PublicationToolItalyNorth", summary = "Italy North intraday CNECs",
+        description = "Italy North intraday CNECs (same shape as DA).",
+        params = [:from_utc_iso, :to_utc_iso, :skip, :take, :filter_json],
+        response_schema = "DomainEnvelope",
+    ),
+    (
+        server = "publicationtool_italynorth", segment = "data",
+        path = "/CCR_forecasted", op_id = "publicationtool_italynorth_da_forecasted",
+        tag = "PublicationToolItalyNorth", summary = "Italy North day-ahead grid forecasts",
+        description = "Italy North forecasted grid status for the DA timeframe.",
+        params = [:from_utc_z, :to_utc_z],
+        response_schema = "DataEnvelope",
+    ),
+    (
+        server = "publicationtool_italynorth", segment = "data",
+        path = "/CCR_idForecasted", op_id = "publicationtool_italynorth_id_forecasted",
+        tag = "PublicationToolItalyNorth", summary = "Italy North intraday grid forecasts",
+        description = "Italy North intraday-timeframe forecasted grid status.",
+        params = [:from_utc_z, :to_utc_z],
+        response_schema = "DataEnvelope",
+    ),
+    (
+        server = "publicationtool_italynorth", segment = "data",
+        path = "/CCR_FinalTtcNtc", op_id = "publicationtool_italynorth_da_final_ttc_ntc",
+        tag = "PublicationToolItalyNorth", summary = "Italy North day-ahead final TTC/NTC",
+        description = "Final TTC and NTC values published for the Italy North day-ahead window.",
+        params = [:from_utc_z, :to_utc_z],
+        response_schema = "DataEnvelope",
+    ),
+    (
+        server = "publicationtool_italynorth", segment = "data",
+        path = "/CCR_idFinalTtcNtc", op_id = "publicationtool_italynorth_id_final_ttc_ntc",
+        tag = "PublicationToolItalyNorth", summary = "Italy North intraday final TTC/NTC",
+        description = "Final TTC and NTC values for the Italy North intraday window.",
+        params = [:from_utc_z, :to_utc_z],
+        response_schema = "DataEnvelope",
+    ),
+    (
+        server = "publicationtool_italynorth", segment = "data",
+        path = "/CCR_allocationConstraint", op_id = "publicationtool_italynorth_da_allocation_constraint",
+        tag = "PublicationToolItalyNorth", summary = "Italy North day-ahead allocation constraints",
+        description = "Allocation constraints applied to the Italy North day-ahead allocation.",
+        params = [:from_utc_z, :to_utc_z],
+        response_schema = "DataEnvelope",
+    ),
+    (
+        server = "publicationtool_italynorth", segment = "data",
+        path = "/CCR_idAllocationConstraint", op_id = "publicationtool_italynorth_id_allocation_constraint",
+        tag = "PublicationToolItalyNorth", summary = "Italy North intraday allocation constraints",
+        description = "Allocation constraints applied to the Italy North intraday allocation.",
+        params = [:from_utc_z, :to_utc_z],
+        response_schema = "DataEnvelope",
+    ),
+
+    # ──── Publication Tool — Core CCR Intraday (CC + IDA variants) ────
+    #
+    # All variants share the endpoint set below; the per-variant prefix
+    # (`IDCCa_`, `IDCCb_`, …, `ID1_`, …) is added in the build loop
+    # from `_INTRADAY_VARIANTS`. Disabled for intraday: `lta`,
+    # `spanningDefaultFBP`, `shadowPrices`, `alphaFactor`. `monitoring`
+    # is served from `/system/` *without* the variant prefix and is
+    # therefore declared once under Core DA, not here.
+    # (entries below are expanded per variant inside `build_spec`)
+    # ── INTRADAY_VARIANT_EXPANSION_POINT ──
+
     # ──── OWSMP — Auctions API ────
     (
         server = "owsmp",
@@ -554,11 +783,101 @@ function problem_response(desc::AbstractString)
     )
 end
 
+# Endpoint set shared by every CoreID intraday variant — DA endpoints
+# minus the ones jao-py marks as disabled (`lta`, `spanningDefaultFBP`,
+# `shadowPrices`, `alphaFactor`) plus the intraday-specific
+# `intradayAtc` / `intradayNtc`.
+const _INTRADAY_ENDPOINT_TEMPLATES = [
+    (
+        suffix = "finalComputation", op_id = "final_computation",
+        summary = "Final FB domain", shape = :domain,
+    ),
+    (
+        suffix = "preFinalComputation", op_id = "prefinal_computation",
+        summary = "Pre-final FB domain", shape = :domain,
+    ),
+    (
+        suffix = "initialComputation", op_id = "initial_computation",
+        summary = "Initial FB domain", shape = :domain,
+    ),
+    (
+        suffix = "netPos", op_id = "net_position",
+        summary = "Net positions per zone", shape = :range,
+    ),
+    (
+        suffix = "validationReductions", op_id = "validation_reductions",
+        summary = "TSO validation reductions", shape = :range,
+    ),
+    (
+        suffix = "maxExchanges", op_id = "max_exchanges",
+        summary = "Max bilateral exchanges per border", shape = :range,
+    ),
+    (
+        suffix = "maxNetPos", op_id = "max_net_positions",
+        summary = "Min/max net positions per zone", shape = :range,
+    ),
+    (
+        suffix = "allocationConstraint", op_id = "allocation_constraint",
+        summary = "Allocation constraints", shape = :range,
+    ),
+    (
+        suffix = "priceSpread", op_id = "price_spread",
+        summary = "Intraday price spreads", shape = :range,
+    ),
+    (
+        suffix = "scheduledExchanges", op_id = "scheduled_exchanges",
+        summary = "Scheduled exchanges per border", shape = :range,
+    ),
+    (
+        suffix = "intradayAtc", op_id = "intraday_atc",
+        summary = "Border intraday ATC", shape = :range,
+    ),
+    (
+        suffix = "intradayNtc", op_id = "intraday_ntc",
+        summary = "Border intraday NTC", shape = :range,
+    ),
+    (
+        suffix = "d2CF", op_id = "d2cf",
+        summary = "D-2 congestion forecast", shape = :range,
+    ),
+    (
+        suffix = "refprog", op_id = "refprog",
+        summary = "Reference programs", shape = :range,
+    ),
+    (
+        suffix = "congestionIncome", op_id = "congestion_income",
+        summary = "Congestion income per border", shape = :range,
+    ),
+]
+
+function _intraday_entries()
+    out = NamedTuple[]
+    for variant in _INTRADAY_VARIANTS, t in _INTRADAY_ENDPOINT_TEMPLATES
+        is_domain = t.shape == :domain
+        push!(
+            out, (
+                server = "publicationtool_coreid",
+                segment = "data",
+                path = "/" * variant.endpoint_prefix * t.suffix,
+                op_id = "publicationtool_$(variant.op_id_part)_" * t.op_id,
+                tag = variant.tag,
+                summary = t.summary,
+                description = variant.summary_suffix * " — " * t.summary * ".",
+                params = is_domain ?
+                    [:from_utc_iso, :to_utc_iso, :skip, :take, :filter_json] :
+                    [:from_utc_z, :to_utc_z],
+                response_schema = is_domain ? "DomainEnvelope" : "DataEnvelope",
+            )
+        )
+    end
+    return out
+end
+
 function build_spec()
     paths = OrderedDict{String, Any}()
     tags = String[]
 
-    for entry in ENDPOINT_TABLE
+    for entry in Iterators.flatten((ENDPOINT_TABLE, _intraday_entries()))
         path = build_path(entry)
         path_obj = get!(paths, path, OrderedDict{String, Any}())
         method = "get"
@@ -588,19 +907,49 @@ function build_spec()
                     "`$(srv.prefix)` (collapsed by the client hook).",
                 ) for (_, srv) in SERVER_REGISTRY
         ],
-        "tags" => [
-            OrderedDict{String, Any}(
-                "name" => "PublicationToolCoreDA",
-                "description" => "Core CCR day-ahead flow-based market " *
-                    "coupling — domain, net positions, shadow prices, " *
-                    "validations, monitoring.",
-            ),
-            OrderedDict{String, Any}(
-                "name" => "OwsmpAuctions",
-                "description" => "Explicit cross-border capacity auctions " *
-                    "(OWSMP). API key required (`AUTH_API_KEY` header).",
-            ),
-        ],
+        "tags" => vcat(
+            OrderedDict{String, Any}[
+                OrderedDict{String, Any}(
+                    "name" => "PublicationToolCoreDA",
+                    "description" => "Core CCR day-ahead flow-based market " *
+                        "coupling — domain, net positions, shadow prices, " *
+                        "validations, monitoring.",
+                ),
+                OrderedDict{String, Any}(
+                    "name" => "PublicationToolNordicDA",
+                    "description" => "Nordic CCR day-ahead — subset of Core " *
+                        "(no `lta`, `netPos`, `allocationConstraint`, " *
+                        "`alphaFactor`, `priceSpread`, `scheduledExchanges`) " *
+                        "plus `fbDomainShadowPrice`; `d2CF` renamed to " *
+                        "`cgmForeCast`; filter key `NonRedundant` replaces " *
+                        "`Presolved`.",
+                ),
+                OrderedDict{String, Any}(
+                    "name" => "PublicationToolItalyNorth",
+                    "description" => "Italy North CCR — `CCR_*` for " *
+                        "day-ahead, `CCR_id*` for intraday. Smaller surface " *
+                        "than Core (CNECs, forecasts, TTC/NTC, allocation " *
+                        "constraints).",
+                ),
+            ],
+            [
+                OrderedDict{String, Any}(
+                        "name" => v.tag,
+                        "description" => v.summary_suffix * ". Endpoints carry " *
+                        "the variant prefix `$(v.endpoint_prefix)`; the " *
+                        "`monitoring` system endpoint is shared with Core " *
+                        "(see PublicationToolCoreDA tag).",
+                    ) for v in _INTRADAY_VARIANTS
+            ],
+            OrderedDict{String, Any}[
+                OrderedDict{String, Any}(
+                    "name" => "OwsmpAuctions",
+                    "description" => "Explicit cross-border capacity " *
+                        "auctions (OWSMP). API key required " *
+                        "(`AUTH_API_KEY` header).",
+                ),
+            ],
+        ),
         "paths" => paths,
         "components" => OrderedDict{String, Any}(
             "schemas" => RESPONSE_SCHEMAS,

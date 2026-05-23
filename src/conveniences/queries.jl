@@ -39,10 +39,11 @@ end
 """
     final_domain(client, from, to) -> (DomainEnvelope, OpenAPI.Clients.ApiResponse)
 
-Fetch the final Core CCR flow-based domain (CNECs + PDFFs) for the
+Fetch the final Core CCR flow-based domain (CNECs + PTDFs) for the
 market time unit `[from, to)`. Use the two-phase pattern for large
-windows: issue with `take = 0` to read [`total_rows`](@ref), then
-paginate via [`final_domain_page`](@ref).
+windows: drop into the generated layer (`JAOEU.JAOEUAPI.publicationtool_core_da_final_computation`)
+with `take = 0` to read [`total_rows`](@ref), then page in 5000-row
+chunks (the size jao-py uses).
 
 The default call returns the first 5000 rows — matching jao-py's chunk
 size — which is enough for any single MTU but not for cross-MTU pulls.
@@ -73,9 +74,8 @@ end
 """
     auction_corridors(client) -> (Any, OpenAPI.Clients.ApiResponse)
 
-Enumerate corridor identifiers usable for [`auction_results`](@ref) and
-[`auction_curtailment`](@ref). Requires an OWSMP API key (see
-[`OwsmpClient`](@ref)).
+Enumerate corridor identifiers usable for [`auction_results`](@ref).
+Requires an OWSMP API key (see [`OwsmpClient`](@ref)).
 """
 function auction_corridors(client::Client)
     api = owsmp_auctions_api(client)

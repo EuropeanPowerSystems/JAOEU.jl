@@ -188,9 +188,9 @@ function _oacinternal_publicationtool_core_da_final_computation(_api::Publicatio
     return _ctx
 end
 
-@doc raw"""Final flow-based domain (CNECs + PTDFs)
+@doc raw"""Final flow-based domain (CNECs + PDFFs)
 
-Final computation of the Core CCR flow-based domain for the requested market time unit: critical network elements, their contingencies, RAMs, and PTDFs per bidding-zone hub. Paginate via `Skip`/`Take`; use `Filter` to narrow by CNEC, TSO, or presolved state.
+Final computation of the Core CCR flow-based domain for the requested market time unit: critical network elements, their contingencies, RAMs, and PDFFs per bidding-zone hub. Paginate via `Skip`/`Take`; use `Filter` to narrow by CNEC, TSO, or presolved state.
 
 Params:
 - from_utc::ZonedDateTime (required)

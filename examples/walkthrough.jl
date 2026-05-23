@@ -10,7 +10,6 @@
 
 using JAOEU
 using Dates
-using Statistics: mean, extrema
 
 # ──── tiny presentation helpers ───────────────────────────────────────────
 

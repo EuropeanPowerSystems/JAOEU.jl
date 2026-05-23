@@ -6,6 +6,11 @@
 BA = "BA"
 ELES = "ELES"     # Slovenian TSO acronym, embedded in their EIC code
 YSE = "YSE"       # appears inside Swedish EIC "10YSE-1--------K"
+# Power Transfer Distribution Factor — typos's dictionary maps `PTD` →
+# `PDF`, which mangles PTDFs into PDFFs. Whitelist both the 3-letter
+# substring (covers any PTD* identifier) and the common plural form.
+PTD = "PTD"
+PTDFs = "PTDFs"
 
 [files]
 # `src/api/` is openapi-generator output. Treating it as authoritative

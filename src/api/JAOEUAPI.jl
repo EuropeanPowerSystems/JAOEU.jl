@@ -13,6 +13,9 @@ include("modelincludes.jl")
 
 include("apis/api_OwsmpAuctionsApi.jl")
 include("apis/api_PublicationToolCoreDAApi.jl")
+include("apis/api_PublicationToolCoreIDCCaApi.jl")
+include("apis/api_PublicationToolItalyNorthApi.jl")
+include("apis/api_PublicationToolNordicDAApi.jl")
 
 # export models
 export DataEnvelope
@@ -22,5 +25,8 @@ export ProblemDetails
 # export operations
 export OwsmpAuctionsApi
 export PublicationToolCoreDAApi
+export PublicationToolCoreIDCCaApi
+export PublicationToolItalyNorthApi
+export PublicationToolNordicDAApi
 
 end # module JAOEUAPI

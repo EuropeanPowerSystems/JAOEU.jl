@@ -8,7 +8,9 @@ include("parsing.jl")
 include("queries.jl")
 
 export PublicationToolClient, OwsmpClient
-export publicationtool_core_da_api, owsmp_auctions_api
+export publicationtool_core_da_api, publicationtool_nordic_da_api,
+    publicationtool_italynorth_api, publicationtool_coreid_cc_a_api,
+    owsmp_auctions_api
 export to_zoned_utc
 export rows, total_rows
 export net_position, final_domain, monitoring
