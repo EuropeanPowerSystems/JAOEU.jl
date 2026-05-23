@@ -106,8 +106,9 @@ end
 
 Build a [`Client`](@ref) for the OWSMP cross-border capacity auctions
 API. `api_key` is sent on every request as the `AUTH_API_KEY` header.
-Tokens are issued by JAO's helpdesk on request (email `helpdesk@jao.eu`
-with subject `[API] Token Request` after accepting the T&Cs).
+Request a token from <https://www.jao.eu/page-api/market-data> via
+"Request Token" — JAO issues a UUID after you submit the form and
+accept the T&Cs.
 """
 function OwsmpClient(api_key::AbstractString)
     auth = APIKey(String(api_key); header = "AUTH_API_KEY")

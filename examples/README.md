@@ -25,8 +25,8 @@ key, resolved in this order:
 If neither is set, the OWSMP section logs a hint and skips itself —
 the rest of the walkthrough still runs.
 
-Request an OWSMP key from `helpdesk@jao.eu` with subject
-`[API] Token Request` after accepting the T&Cs.
+Request an OWSMP key from <https://www.jao.eu/page-api/market-data> —
+click "Request Token", submit the form, and accept the T&Cs.
 
 ## What it covers
 

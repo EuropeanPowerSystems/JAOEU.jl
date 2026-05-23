@@ -3923,4 +3923,4 @@ components:
       type: "apiKey"
       in: "header"
       name: "AUTH_API_KEY"
-      description: "Issued by JAO helpdesk (`helpdesk@jao.eu`, subject `[API] Token Request`) after accepting the T&Cs."
+      description: "Issued by JAO via the form at <https://www.jao.eu/page-api/market-data> (`Request Token`) after accepting the T&Cs."

@@ -13,6 +13,7 @@ Everything here is anonymous — no token is needed. The Publication Tool embeds
 ```@example tutorial
 using JAOEU
 using Dates
+using DataFrames
 
 client = PublicationToolClient()
 
@@ -32,21 +33,20 @@ The `monitoring` endpoint reports when each computation stage finishes for a giv
 
 ```@example tutorial
 env, _ = monitoring(client, t0, t1)
-n_records = length(rows(env))
-n_records
+df = DataFrame(env)
+size(df)
 ```
 
-`monitoring` returns a `(DataEnvelope, ApiResponse)` tuple. [`rows`](@ref) unwraps the `data` field; what comes back is a `Vector{JSON.Object{String, Any}}` — each entry behaves like a `Dict{String, Any}`.
+`monitoring` returns a `(DataEnvelope, ApiResponse)` tuple. The envelope implements the Tables.jl interface, so `DataFrame(env)` works directly — no manual unwrapping. (For raw dict access, [`rows`](@ref) still returns the underlying `Vector{JSON.Object}`.)
 
 ```@example tutorial
-first(rows(env))
+df[1, [:businessDayUtc, :page, :status, :deadline]]
 ```
 
-Stage names live in the `page` field — `Initial Computation (Virgin Domain)`, `Pre-Final Computation`, `Final Computation`, plus a half-dozen validations. The publication `status` is usually `Received` for any day published in the last few years; `Pending` shows up on the current day in real time.
+Stage names live in the `page` column — `Initial Computation (Virgin Domain)`, `Pre-Final Computation`, `Final Computation`, plus a half-dozen validations. The publication `status` is usually `Received` for any day published in the last few years; `Pending` shows up on the current day in real time.
 
 ```@example tutorial
-stages = unique(get(r, "page", "(unknown)") for r in rows(env))
-length(stages)
+unique(df.page)
 ```
 
 ## 2. Net positions per zone
@@ -55,27 +55,26 @@ length(stages)
 
 ```@example tutorial
 env_np, _ = net_position(client, t0, t1)
-records = rows(env_np)
-(n_mtus = length(records), zone_columns = sort([k for k in keys(first(records)) if startswith(k, "hub_")]))
+df_np = DataFrame(env_np)
+(n_mtus = nrow(df_np),
+ hubs = filter(startswith("hub_"), names(df_np)))
 ```
 
 The 12 physical zones plus 2 virtual hubs (`ALBE`, `ALDE`) cover the Core CCR perimeter. The values are signed MW — positive means the zone is exporting net, negative means importing.
 
 ```@example tutorial
-# Net position of the Netherlands hour by hour
-[(hour = i - 1,
-  NL_MW = round(Int, get(r, "hub_NL", 0)))
- for (i, r) in enumerate(records)]
+# Netherlands net position, hour by hour
+[(hour = i - 1, NL_MW = round(Int, df_np.hub_NL[i])) for i in 1:nrow(df_np)]
 ```
 
 ```@example tutorial
 # Day-totals per zone, sorted by absolute size
-zone_keys = sort([k for k in keys(first(records)) if startswith(k, "hub_")])
-totals = [(zone = replace(k, "hub_" => ""),
-           total_MWh = round(Int, sum(get(r, k, 0) for r in records)))
-          for k in zone_keys]
-sort!(totals, by = t -> -abs(t.total_MWh))
-totals
+zone_cols = filter(startswith("hub_"), names(df_np))
+totals = sort(
+    [(zone = replace(c, "hub_" => ""), total_MWh = round(Int, sum(df_np[!, c])))
+     for c in zone_cols];
+    by = t -> -abs(t.total_MWh),
+)
 ```
 
 A single number summary: France was the biggest net exporter, Belgium the biggest net importer (typical for a late-summer trading day with French nuclear running and Belgian thermal recovering from summer maintenance).
@@ -89,32 +88,31 @@ A single number summary: France was the biggest net exporter, Belgium the bigges
 mtu_start = t0
 mtu_end   = DateTime("2024-09-01T23:00")
 env_dom, _ = final_domain(client, mtu_start, mtu_end)
+df_dom = DataFrame(env_dom)
 
-(rows_returned = length(rows(env_dom)),
- totalRowsWithFilter = total_rows(env_dom))
+(rows_returned = nrow(df_dom),
+ totalRowsWithFilter = total_rows(env_dom),
+ columns = ncol(df_dom))
 ```
 
-The server reports the same number for both — the response is not actually paginated for a single-MTU window. For multi-MTU pulls or wide filters, the two-phase pattern still applies: issue with `take = 0` first, read `totalRowsWithFilter`, then page in 5000-row chunks (the size jao-py uses).
+The server reports the same number for `rows_returned` and `totalRowsWithFilter` — the response is not paginated for a single-MTU window. For multi-MTU pulls or wide filters, the two-phase pattern still applies: drop into the generated layer with `take = 0` first, read `totalRowsWithFilter`, then page in 5000-row chunks (the size jao-py uses).
 
 ```@example tutorial
-sample = first(rows(env_dom))
-ptdf_keys = sort([k for k in keys(sample) if startswith(k, "ptdf_")])
-meta_keys = sort([k for k in keys(sample) if !startswith(k, "ptdf_")])
-(metadata_columns = length(meta_keys),
- ptdf_columns = length(ptdf_keys))
+ptdf_cols = filter(startswith("ptdf_"), names(df_dom))
+meta_cols = filter(!startswith("ptdf_"), names(df_dom))
+(ptdf_columns = length(ptdf_cols), metadata_columns = length(meta_cols))
 ```
 
-The metadata describes the network element: line ID, voltage, the contingency it's monitored under, RAM, FMax, etc. The PTDF columns are the per-hub injection sensitivities — what fraction of a 1 MW injection at hub X shows up as flow on this line.
+The metadata columns describe the network element: line ID, voltage, the contingency it's monitored under, RAM, FMax, etc. The PTDF columns are the per-hub injection sensitivities — what fraction of a 1 MW injection at hub X shows up as flow on this line.
 
 ```@example tutorial
 # A peek at one CNEC's PTDFs, sorted by magnitude. Some PTDFs come
-# back as `null` (no sensitivity to a zone for this CNEC) — coerce
-# those to zero for the sort.
-_ptdf(v) = v === nothing ? 0.0 : Float64(v)
+# back as `missing` (no sensitivity to a zone for this CNEC) —
+# `coalesce` to zero for the sort.
 ptdfs = sort(
-    [(hub = replace(k, "ptdf_" => ""),
-      ptdf = round(_ptdf(get(sample, k, nothing)); digits = 3))
-     for k in ptdf_keys];
+    [(hub = replace(c, "ptdf_" => ""),
+      ptdf = round(coalesce(df_dom[1, c], 0.0); digits = 3))
+     for c in ptdf_cols];
     by = p -> -abs(p.ptdf),
 )
 ptdfs[1:min(6, end)]

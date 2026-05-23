@@ -97,7 +97,7 @@ env, _ = monitoring(client, DateTime("2024-09-01T00:00"),
                             DateTime("2024-09-02T00:00"))
 records = rows(env)   # Vector of JSON.Object — pass to DataFrame, StructArray, …
 
-# OWSMP — API key required (helpdesk@jao.eu, subject `[API] Token Request`)
+# OWSMP — API key required (request via jao.eu/page-api/market-data → Request Token)
 auct = OwsmpClient(ENV["JAO_OWSMP_API_KEY"])
 corridors, _ = auction_corridors(auct)
 ```

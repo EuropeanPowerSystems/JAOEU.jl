@@ -188,7 +188,7 @@ if isempty(OWSMP_KEY)
     warn("no OWSMP key found — skipping OWSMP sections")
     note("To enable: set ENV[\"JAO_OWSMP_API_KEY\"] or write a key to")
     note("$(joinpath(@__DIR__, "..", "token.txt"))")
-    note("Get one from helpdesk@jao.eu (subject `[API] Token Request`)")
+    note("Get one from https://www.jao.eu/page-api/market-data (Request Token)")
 else
     note("OWSMP key found (length $(length(OWSMP_KEY))) — running OWSMP sections")
 
