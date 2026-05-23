@@ -16,7 +16,11 @@
 
 using Pkg
 
-const SPEC_URL = "/tmp/jaoeu-bootstrap/spec/openapi.json"
+# The spec is built locally by `scripts/build_openapi.jl` — JAO publishes
+# no machine-readable spec, so there is no upstream URL to drift against.
+# Run the build script first if the endpoint table changed; this script
+# then consumes the resulting `spec/openapi.json`.
+const SPEC_URL = joinpath(dirname(@__DIR__), "spec", "openapi.json")
 const API_PKG = "JAOEUAPI"
 const GENERATOR_VERSION = "7.10.0"
 const NPM_WRAPPER_VERSION = "2.21.4"
@@ -86,17 +90,23 @@ function main()
         Pkg.PlatformEngines.download(SPEC_URL, spec_local)
     else
         isfile(SPEC_URL) || error("Spec not found: $SPEC_URL")
-        cp(SPEC_URL, spec_local; force = true)
+        if realpath(SPEC_URL) == realpath(spec_local)
+            @info "Spec already at canonical location $spec_local; skipping copy"
+        else
+            cp(SPEC_URL, spec_local; force = true)
+        end
     end
 
     mktempdir() do tmp
         out = joinpath(tmp, "out")
-        cmd = Cmd(`npx --yes @openapitools/openapi-generator-cli@$(NPM_WRAPPER_VERSION) generate
+        cmd = Cmd(
+            `npx --yes @openapitools/openapi-generator-cli@$(NPM_WRAPPER_VERSION) generate
                    -i $spec_local
                    -g julia-client
                    -o $out
                    --additional-properties=packageName=$(API_PKG),exportModels=true,exportOperations=true`;
-                  dir = tmp)
+            dir = tmp
+        )
         env = copy(ENV)
         env["OPENAPI_GENERATOR_VERSION"] = GENERATOR_VERSION
         run(setenv(cmd, env))
@@ -136,8 +146,10 @@ function main()
         # them).
         if isfile(generated_ref)
             @info "Refreshing generated_reference.md base-path section."
-            Base.invokelatest(m.emit_basepath_section, generated_ref,
-                joinpath(api_target, "apis"), API_PKG[1:end-3])
+            Base.invokelatest(
+                m.emit_basepath_section, generated_ref,
+                joinpath(api_target, "apis"), API_PKG[1:(end - 3)]
+            )
         end
     end
 
@@ -146,7 +158,7 @@ function main()
         run(Cmd(`git diff --stat src/api spec docs/src docs/src/api`; dir = pkg_root))
     end
 
-    @info "Regeneration complete." spec = spec_local api = api_target
+    return @info "Regeneration complete." spec = spec_local api = api_target
 end
 
 main()

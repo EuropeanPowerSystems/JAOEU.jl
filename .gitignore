@@ -10,3 +10,4 @@ docs/.vitepress/dist/
 docs/build/
 docs/package-lock.json
 node_modules/
+test/Manifest.toml

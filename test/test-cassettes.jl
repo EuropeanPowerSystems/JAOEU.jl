@@ -43,10 +43,12 @@ function _run_cassette_tests(BrokenRecord)
         #    fail to replay on a different Julia minor version than the
         #    one used to record. Header matching is case-sensitive, so
         #    list common case variants of the same name.
-        ignore_headers = ["Authorization", "X-API-Key", "api_key",
-                          "X-Api-Key", "Cookie", "Set-Cookie",
-                          "Proxy-Authorization", "User-Agent",
-                          "Accept-Encoding"],
+        ignore_headers = [
+            "Authorization", "X-API-Key", "api_key",
+            "X-Api-Key", "Cookie", "Set-Cookie",
+            "Proxy-Authorization", "User-Agent",
+            "Accept-Encoding",
+        ],
         ignore_query = ["api_key", "token", "access_token"],
     )
 

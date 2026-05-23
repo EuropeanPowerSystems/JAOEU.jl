@@ -41,4 +41,3 @@ Explicit cross-border capacity auctions (OWSMP). API key required (`AUTH_API_KEY
 ```@raw html
 <OAOperation operationId="owsmp_get_horizons" prefix-headings="true" />
 ```
-

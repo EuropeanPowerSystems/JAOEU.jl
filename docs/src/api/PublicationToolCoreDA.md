@@ -34,7 +34,7 @@ Core CCR day-ahead flow-based market coupling — domain, net positions, shadow 
 <OAOperation operationId="publicationtool_core_da_d2cf" prefix-headings="true" />
 ```
 
-## Final flow-based domain (CNECs + PTDFs)
+## Final flow-based domain (CNECs + PDFFs)
 
 `GET /publicationtool/core/data/finalComputation`
 
@@ -145,4 +145,3 @@ Core CCR day-ahead flow-based market coupling — domain, net positions, shadow 
 ```@raw html
 <OAOperation operationId="publicationtool_core_da_monitoring" prefix-headings="true" />
 ```
-

@@ -35,4 +35,8 @@ export with_logging, redact_headers
 export DefaultMiddleware, default_middleware, with_defaults
 export paginate_cursor, paginate_offset, paginate_pagenum
 
+# JAO-specific helpers (hand-written, untouched by codegen). Safe across
+# `gen/regenerate.jl` runs — that script only rewrites `src/api/`.
+include("conveniences/conveniences.jl")
+
 end # module

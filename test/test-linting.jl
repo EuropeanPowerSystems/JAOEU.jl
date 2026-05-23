@@ -15,8 +15,10 @@ let aqua_id = Base.identify_package("Aqua")
             # `Base.require` advances the world; without `invokelatest` Julia
             # 1.12 refuses to dispatch to a method whose world is newer than
             # the call site's.
-            Base.invokelatest(Aqua.test_all, JAOEU;
-                ambiguities = false, stale_deps = false)
+            Base.invokelatest(
+                Aqua.test_all, JAOEU;
+                ambiguities = false, stale_deps = false
+            )
         end
     end
 end
@@ -28,8 +30,10 @@ if v"1.12" <= VERSION < v"1.13"
         else
             JET = Base.require(jet_id)
             @testset "JET" begin
-                Base.invokelatest(JET.test_package, JAOEU;
-                    target_modules = (JAOEU,))
+                Base.invokelatest(
+                    JET.test_package, JAOEU;
+                    target_modules = (JAOEU,)
+                )
             end
         end
     end
