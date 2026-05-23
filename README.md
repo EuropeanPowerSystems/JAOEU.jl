@@ -110,7 +110,7 @@ layer (`JAOEU.JAOEUAPI.publicationtool_core_da_final_computation`) with
 ### 4. OWSMP auction corridors (needs token)
 
 Once you have a token (see below), enumerate the corridors usable by
-[`auction_results`](https://EuropeanPowerSystems.github.io/JAOEU.jl/dev/julia_reference/#JAOEU.auction_results):
+`auction_results`:
 
 ```julia
 using JAOEU
@@ -193,17 +193,16 @@ and emits OpenAPI 3.1.
 
 The full docs site (auto-deployed from `main`) lives at
 [EuropeanPowerSystems.github.io/JAOEU.jl/dev/](https://EuropeanPowerSystems.github.io/JAOEU.jl/dev/).
-Highlights:
+The same pages also render directly on GitHub from the repo:
 
-- [Quickstart tutorial](https://EuropeanPowerSystems.github.io/JAOEU.jl/dev/tutorial/) —
-  monitoring, net positions, and the flow-based domain across one
-  trading day.
-- [Net positions on a European map](https://EuropeanPowerSystems.github.io/JAOEU.jl/dev/tutorial_net_positions_map/) —
+- [Quickstart tutorial](docs/src/tutorial.md) — monitoring, net
+  positions, and the flow-based domain across one trading day.
+- [Net positions on a European map](docs/src/tutorial_net_positions_map.md) —
   GeoMakie rendering of the 12 Core zones across 24 MTUs.
-- [Julia API reference](https://EuropeanPowerSystems.github.io/JAOEU.jl/dev/julia_reference/) —
-  every exported name with its docstring.
-- [Interactive REST browser](https://EuropeanPowerSystems.github.io/JAOEU.jl/dev/api/) —
-  `vitepress-openapi` rendering of `spec/openapi.json`, with try-it-out.
+- [Julia API reference](docs/src/julia_reference.md) — every exported
+  name with its docstring.
+- Interactive REST browser — only available on the deployed site
+  (Vitepress-OpenAPI rendering of `spec/openapi.json`).
 
 To build the docs locally:
 
