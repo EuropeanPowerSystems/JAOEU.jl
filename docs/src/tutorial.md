@@ -107,11 +107,12 @@ The metadata columns describe the network element: line ID, voltage, the conting
 
 ```@example tutorial
 # A peek at one CNEC's PTDFs, sorted by magnitude. Some PTDFs come
-# back as `missing` (no sensitivity to a zone for this CNEC) —
-# `coalesce` to zero for the sort.
+# back as `missing` (column absent on this row) or `nothing` (JSON
+# null — no sensitivity declared). Coerce both to zero.
+_ptdf(v) = (v === nothing || v === missing) ? 0.0 : Float64(v)
 ptdfs = sort(
     [(hub = replace(c, "ptdf_" => ""),
-      ptdf = round(coalesce(df_dom[1, c], 0.0); digits = 3))
+      ptdf = round(_ptdf(df_dom[1, c]); digits = 3))
      for c in ptdf_cols];
     by = p -> -abs(p.ptdf),
 )

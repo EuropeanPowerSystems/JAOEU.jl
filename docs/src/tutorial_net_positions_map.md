@@ -169,13 +169,22 @@ for (i, iso) in enumerate(plotted_iso)
         colormap = COLORMAP, colorrange = NP_RANGE,
         strokecolor = :white, strokewidth = 0.6)
 end
+# Branch label colour per-zone: white text + dark halo on saturated
+# polygons, black text + light halo on the pastel ones. Picking the
+# threshold against `NP_BOUND` keeps the rule symmetric and self-
+# scaling — change the colour scale and the labels follow.
 for (i, iso) in enumerate(plotted_iso)
     haskey(label_for, iso) || continue
+    val = np_by_iso[iso][peak_hour]
+    intensity = abs(val) / NP_BOUND
+    dark_bg = intensity > 0.35
     text!(ax, plotted_centers[i]...;
-        text = "$(label_for[iso])\n$(round(Int, np_by_iso[iso][peak_hour]))",
+        text = "$(label_for[iso])\n$(round(Int, val))",
         align = (:center, :center),
-        fontsize = 13, color = :white, font = :bold,
-        strokewidth = 1.4, strokecolor = :black)
+        fontsize = 13, font = :bold,
+        color = dark_bg ? :white : :black,
+        strokewidth = 0.8,
+        strokecolor = dark_bg ? :black : :white)
 end
 Colorbar(fig[1, 2];
     colormap = COLORMAP, colorrange = NP_RANGE,

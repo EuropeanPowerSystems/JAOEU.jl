@@ -46,6 +46,7 @@ const PAGES = Any[
     "Tutorials" => Any[
         "One trading day, three views" => "tutorial.md",
         "Net positions on a European map" => "tutorial_net_positions_map.md",
+        "Flow-based domain in 2D" => "tutorial_fb_domain_2d.md",
     ],
     "Guides" => Any[
         "Recorded HTTP tests" => "cassette_testing.md",
