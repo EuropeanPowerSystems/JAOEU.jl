@@ -17,7 +17,7 @@ TimeZones = "f269a46b-ccf7-5d73-abea-4c690281aa53"
 [compat]
 Base64 = "1"
 Dates = "1"
-HTTP = "1"
+HTTP = "1, 2.0"
 JSON = "1"
 Logging = "1"
 OpenAPI = "0.2"
